@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calories Calculator</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 18px;
+  background: #101827;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+h1 { font-size: 28px; }
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 18px;
+  margin: 18px 0;
+}
+label { display:block; margin-top:14px; color:#cbd5e1; }
+input, select {
+  width:100%;
+  padding:13px;
+  margin-top:7px;
+  border:0;
+  border-radius:10px;
+  font-size:16px;
+}
+button {
+  width:100%;
+  padding:15px;
+  margin-top:20px;
+  background:#38bdf8;
+  border:0;
+  border-radius:12px;
+  font-size:17px;
+  font-weight:bold;
+}
+.result {
+  font-size:30px;
+  font-weight:bold;
+  color:#38bdf8;
+}
+.small { color:#94a3b8; font-size:13px; }
+</style>
+</head>
+<body>
+
+<h1>🔥 Calories Calculator</h1>
+<p class="small">個人每日熱量計算系統</p>
+
+<div class="card">
+<h2>👤 個人基本資料</h2>
+
+<label>使用者名稱</label>
+<input id="name" value="使用者">
+
+<label>性別</label>
+<select id="sex">
+<option value="male">男性</option>
+<option value="female">女性</option>
+</select>
+
+<label>出生日期</label>
+<input id="birth" type="date" value="1991-01-01">
+
+<label>身高 (cm)</label>
+<input id="height" type="number" value="170">
+
+<label>體重 (kg)</label>
+<input id="weight" type="number" value="65" step="0.1">
+
+<label>活動程度</label>
+<select id="activity">
+<option value="1.2">久坐，少運動</option>
+<option value="1.375">輕度活動</option>
+<option value="1.55" selected>中度活動</option>
+<option value="1.725">高度活動</option>
+<option value="1.9">非常高度活動</option>
+</select>
+
+<button onclick="save()">儲存資料並計算</button>
+</div>
+
+<div class="card">
+<h2>📊 計算結果</h2>
+<p>目前年齡</p>
+<div class="result" id="age">--</div>
+
+<p>基礎代謝率 BMR</p>
+<div class="result" id="bmr">--</div>
+<p class="small">kcal / 日</p>
+
+<p>每日總消耗熱量 TDEE</p>
+<div class="result" id="tdee">--</div>
+<p class="small">kcal / 日</p>
+</div>
+
+<script>
+const ids = ["name","sex","birth","height","weight","activity"];
+
+function calculateAge(date) {
+  const birth = new Date(date + "T00:00:00");
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  if (
+    today.getMonth() < birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() &&
+     today.getDate() < birth.getDate())
+  ) age--;
+  return age;
+}
+
+function save() {
+  const data = {};
+  ids.forEach(id => {
+    data[id] = document.getElementById(id).value;
+  });
+
+  const age = calculateAge(data.birth);
+  const height = Number(data.height);
+  const weight = Number(data.weight);
+  const activity = Number(data.activity);
+
+  if (!data.birth || age < 0 || !height || !weight ||
+      height <= 0 || weight <= 0) {
+    alert("請確認生日、身高及體重資料");
+    return;
+  }
+
+  const bmr = 10 * weight + 6.25 * height - 5 * age +
+    (data.sex === "male" ? 5 : -161);
+  const tdee = bmr * activity;
+
+  localStorage.setItem("calorieProfile", JSON.stringify(data));
+
+  document.getElementById("age").textContent = age + " 歲";
+  document.getElementById("bmr").textContent =
+    Math.round(bmr).toLocaleString();
+  document.getElementById("tdee").textContent =
+    Math.round(tdee).toLocaleString();
+
+  alert("資料已儲存！");
+}
+
+function load() {
+  const saved = localStorage.getItem("calorieProfile");
+  if (saved) {
+    const data = JSON.parse(saved);
+    ids.forEach(id => {
+      if (data[id] !== undefined) {
+        document.getElementById(id).value = data[id];
+      }
+    });
+  }
+  save();
+}
+
+load();
+</script>
+
+</body>
+</html>
