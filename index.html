@@ -134,7 +134,7 @@ const db = window.supabase.createClient(
 );
 
 const ids = [
-  "name","sex","birth","height","weight"
+  "name","sex","birth","height","weight","activity"
 ];
 
 function calculateAge(date) {
@@ -247,7 +247,7 @@ async function loadProfile() {
 
   const { data, error } = await db
     .from("profiles")
-    .select("name,gender,birth_date,height_cm,weight_kg")
+    .select("name,gender,birth_date,height_cm,weight_kg,activity_factor")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -266,6 +266,8 @@ async function loadProfile() {
       data.height_cm || 170;
     document.getElementById("weight").value =
       data.weight_kg || 65;
+    document.getElementById("activity").value =
+  data.activity_factor || 1.55;
   }
 
   calculate();
@@ -291,7 +293,7 @@ async function saveProfile() {
       gender: document.getElementById("sex").value,
       birth_date: document.getElementById("birth").value,
       height_cm: Number(document.getElementById("height").value),
-      weight_kg: Number(document.getElementById("weight").value)
+      weight_kg: Number(document.getElementById("weight").value), activity_factor: Number(document.getElementById("activity").value)
     };
 
     if (!profile.name) {
